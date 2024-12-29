@@ -1,0 +1,80 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <title>URL Shortener and QR Code Generator</title>
+    <style>
+        #qrcode svg {
+            width: 200px; /* Limit the displayed SVG width */
+            height: auto; /* Maintain aspect ratio */
+        }
+    </style>
+</head>
+<body>
+    <h1>URL Shortener and QR Code Generator</h1>
+    <input type="text" id="url" placeholder="Enter URL" />
+    <button onclick="shortenAndGenerate()">Shorten and Generate QR Code</button>
+    <br><br>
+    <div>
+        <strong>Shortened URL:</strong>
+        <span id="shortened-url"></span>
+    </div>
+    <br>
+    <div id="qrcode"></div>
+
+    <script>
+        async function shortenAndGenerate() {
+            const longURL = document.getElementById('url').value;
+            const shortenedURLSpan = document.getElementById('shortened-url');
+            const qrCodeContainer = document.getElementById('qrcode');
+
+            if (!longURL) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            // Clear previous results
+            shortenedURLSpan.textContent = '';
+            qrCodeContainer.innerHTML = '';
+
+            try {
+                // Call the backend to shorten the URL
+                const response = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: longURL }),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(`Error: ${error.error}`);
+                    return;
+                }
+
+                const data = await response.json();
+                const shortenedURL = data.shortened_url;
+
+                // Display the shortened URL
+                shortenedURLSpan.textContent = shortenedURL;
+
+                // Generate QR Code
+                QRCode.toString(shortenedURL, { type: 'svg', errorCorrectionLevel: 'L' }, (error, svg) => {
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                    qrCodeContainer.innerHTML = svg;
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating QR code');
+            }
+        }
+    </script>
+</body>
+</html>
+
