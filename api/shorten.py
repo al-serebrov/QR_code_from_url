@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route("/shorten", methods=["POST"])
+@app.route("/api/shorten", methods=["POST"])
 def shorten_url():
     data = request.json
     long_url = data.get("url")
