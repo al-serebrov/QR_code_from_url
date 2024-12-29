@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "src": "api/shorten.py",
+      "src": "api/backend.py",
       "use": "@vercel/python"
     },
     {
@@ -10,6 +10,6 @@
     }
   ],
   "routes": [
-    { "src": "/api/shorten", "dest": "/api/shorten.py" }
+    { "src": "/api/shorten", "dest": "/api/backend.py" }
   ]
 }
