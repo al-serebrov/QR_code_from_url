@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,8 +7,11 @@
     <title>URL Shortener and QR Code Generator</title>
     <style>
         #qrcode svg {
-            width: 200px; /* Limit the displayed SVG width */
+            width: 200px; /* Limit the displayed QR code width */
             height: auto; /* Maintain aspect ratio */
+        }
+        #downloadButton {
+            display: none; /* Initially hide the download button */
         }
     </style>
 </head>
@@ -23,12 +26,16 @@
     </div>
     <br>
     <div id="qrcode"></div>
+    <button id="downloadButton" onclick="downloadQRCode()">Download QR Code</button>
 
     <script>
+        let generatedSVG = ''; // Variable to store the generated QR code SVG
+
         async function shortenAndGenerate() {
             const longURL = document.getElementById('url').value;
             const shortenedURLSpan = document.getElementById('shortened-url');
             const qrCodeContainer = document.getElementById('qrcode');
+            const downloadButton = document.getElementById('downloadButton');
 
             if (!longURL) {
                 alert('Please enter a URL');
@@ -38,6 +45,7 @@
             // Clear previous results
             shortenedURLSpan.textContent = '';
             qrCodeContainer.innerHTML = '';
+            downloadButton.style.display = 'none';
 
             try {
                 // Call the backend to shorten the URL
@@ -67,12 +75,33 @@
                         console.error(error);
                         return;
                     }
-                    qrCodeContainer.innerHTML = svg;
+                    generatedSVG = svg; // Store the SVG
+                    qrCodeContainer.innerHTML = svg; // Show the QR code
+                    downloadButton.style.display = 'block'; // Show the download button
                 });
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error generating QR code');
             }
+        }
+
+        function downloadQRCode() {
+            if (!generatedSVG) {
+                alert('No QR Code generated to download');
+                return;
+            }
+
+            // Create a Blob from the SVG string
+            const blob = new Blob([generatedSVG], { type: 'image/svg+xml' });
+
+            // Create a download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'qrcode.svg'; // Default file name
+            link.click();
+
+            // Clean up
+            URL.revokeObjectURL(link.href);
         }
     </script>
 </body>
